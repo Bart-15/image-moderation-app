@@ -7,8 +7,8 @@ export class MainStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    new S3Stack(this, "S3Stack");
+    const s3Stack = new S3Stack(this, "S3Stack");
 
-    new LambdaStack(this, "LambdaStack");
+    new LambdaStack(this, "LambdaStack", { bucket: s3Stack.bucket });
   }
 }
