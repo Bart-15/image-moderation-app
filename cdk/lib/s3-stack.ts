@@ -14,6 +14,18 @@ export class S3Stack extends cdk.Stack {
       ).stackName.toLowerCase()}-image-moderation-bucket`,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      cors: [
+        {
+          allowedHeaders: ["*"],
+          allowedMethods: [
+            s3.HttpMethods.GET,
+            s3.HttpMethods.PUT,
+            s3.HttpMethods.HEAD,
+          ],
+          allowedOrigins: ["*"],
+          exposedHeaders: ["ETag"],
+        },
+      ],
 
       lifecycleRules: [
         {

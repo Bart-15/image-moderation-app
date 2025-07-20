@@ -49,7 +49,7 @@ export class LambdaStack extends Stack {
 
     // Grant S3 permissions to the function
     if (props?.bucket) {
-      props.bucket.grantPut(this.getPresignedUrlFunction);
+      props.bucket.grantReadWrite(this.getPresignedUrlFunction); // Grant both read and write permissions
     }
   }
 }
