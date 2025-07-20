@@ -7,7 +7,10 @@ export class ApiGatewayStack extends cdk.Stack {
   constructor(
     scope: Construct,
     id: string,
-    props?: cdk.StackProps & { getPresignedUrlFunction: lambda.IFunction }
+    props?: cdk.StackProps & {
+      getPresignedUrlFunction: lambda.IFunction;
+      moderateImageFunction: lambda.IFunction;
+    }
   ) {
     super(scope, id, props);
 
@@ -26,6 +29,14 @@ export class ApiGatewayStack extends cdk.Stack {
     presignedUrl.addMethod(
       "GET",
       new apigateway.LambdaIntegration(props?.getPresignedUrlFunction!, {
+        proxy: true,
+      })
+    );
+
+    const moderateImage = api.root.addResource("moderate");
+    moderateImage.addMethod(
+      "POST",
+      new apigateway.LambdaIntegration(props?.moderateImageFunction!, {
         proxy: true,
       })
     );

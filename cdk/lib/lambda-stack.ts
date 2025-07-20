@@ -4,9 +4,11 @@ import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class LambdaStack extends Stack {
   public readonly getPresignedUrlFunction: NodejsFunction;
+  public readonly moderateImageFunction: NodejsFunction;
 
   constructor(
     scope: Construct,
@@ -15,17 +17,35 @@ export class LambdaStack extends Stack {
   ) {
     super(scope, id, props);
 
-    new NodejsFunction(this, "ModerateImageFunction", {
-      runtime: Runtime.NODEJS_22_X,
-      handler: "handler",
-      entry: path.join(__dirname, "../lambda/moderateImage.handler.ts"),
-      bundling: {
-        minify: true,
-        sourceMap: true,
-        target: "es2020",
-        externalModules: ["aws-sdk"],
-      },
-    });
+    // Create the moderate image function
+    this.moderateImageFunction = new NodejsFunction(
+      this,
+      "ModerateImageFunction",
+      {
+        runtime: Runtime.NODEJS_22_X,
+        handler: "handler",
+        entry: path.join(__dirname, "../lambda/moderateImage.handler.ts"),
+        bundling: {
+          minify: true,
+          sourceMap: true,
+          target: "es2020",
+          externalModules: ["aws-sdk"],
+        },
+        environment: {
+          BUCKET_NAME: props?.bucket.bucketName || "",
+        },
+        initialPolicy: [
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: [
+              "rekognition:DetectLabels",
+              "rekognition:DetectModerationLabels",
+            ],
+            resources: ["*"],
+          }),
+        ],
+      }
+    );
 
     // Create the presigned URL generator function
     this.getPresignedUrlFunction = new NodejsFunction(
@@ -50,6 +70,7 @@ export class LambdaStack extends Stack {
     // Grant S3 permissions to the function
     if (props?.bucket) {
       props.bucket.grantReadWrite(this.getPresignedUrlFunction); // Grant both read and write permissions
+      props.bucket.grantRead(this.moderateImageFunction);
     }
   }
 }

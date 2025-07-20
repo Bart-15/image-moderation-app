@@ -10,10 +10,13 @@ export class MainStack extends cdk.Stack {
 
     const s3Stack = new S3Stack(this, "S3Stack");
 
-    const lambdaStack = new LambdaStack(this, "LambdaStack", { bucket: s3Stack.bucket });
+    const lambdaStack = new LambdaStack(this, "LambdaStack", {
+      bucket: s3Stack.bucket,
+    });
 
     new ApiGatewayStack(this, "ApiGatewayStack", {
-      getPresignedUrlFunction: lambdaStack.getPresignedUrlFunction
+      getPresignedUrlFunction: lambdaStack.getPresignedUrlFunction,
+      moderateImageFunction: lambdaStack.moderateImageFunction,
     });
   }
 }
