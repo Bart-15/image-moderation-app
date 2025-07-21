@@ -7,6 +7,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 export interface ApiGatewayStackProps extends cdk.StackProps {
   getPresignedUrlFunction: lambda.IFunction;
   moderateImageFunction: lambda.IFunction;
+  getStatsFunction: lambda.IFunction;
   userPool: cognito.IUserPool;
 }
 
@@ -56,6 +57,18 @@ export class ApiGatewayStack extends cdk.Stack {
     moderateImage.addMethod(
       "POST",
       new apigateway.LambdaIntegration(props.moderateImageFunction, {
+        proxy: true,
+      }),
+      {
+        authorizer: authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    );
+
+    const stats = api.root.addResource("stats");
+    stats.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(props.getStatsFunction, {
         proxy: true,
       }),
       {
