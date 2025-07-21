@@ -6,14 +6,26 @@ import {
   DetectLabelsCommand,
   DetectModerationLabelsCommand,
 } from "@aws-sdk/client-rekognition";
+import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 
 const rekognitionClient = new RekognitionClient({});
+const docClient = new DynamoDBClient({});
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
     const { key } = JSON.parse(event.body || "{}");
+
+    // Get user ID from Cognito authorizer
+    const userId = event.requestContext.authorizer?.claims?.sub;
+
+    if (!userId) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ message: "Unauthorized" }),
+      };
+    }
 
     if (!key || !process.env.BUCKET_NAME) {
       return {
@@ -33,10 +45,40 @@ export const handler = async (
 
     const moderationResponse = await rekognitionClient.send(moderationCommand);
 
-    if (
-      moderationResponse.ModerationLabels &&
-      moderationResponse.ModerationLabels.length > 0
-    ) {
+    const isInappropriate =
+      (moderationResponse.ModerationLabels || []).length > 0;
+
+    // Update user statistics
+    await docClient.send(
+      new UpdateItemCommand({
+        TableName: process.env.USER_STATS_TABLE,
+        Key: { userId: { S: userId } },
+        UpdateExpression:
+          "SET totalUploads = if_not_exists(totalUploads, :zero) + :inc, inappropriateUploads = if_not_exists(inappropriateUploads, :zero) + :inappropriate",
+        ExpressionAttributeValues: {
+          ":inc": { N: "1" },
+          ":inappropriate": { N: isInappropriate ? "1" : "0" },
+          ":zero": { N: "0" },
+        },
+      })
+    );
+
+    // Update total statistics
+    await docClient.send(
+      new UpdateItemCommand({
+        TableName: process.env.USER_STATS_TABLE,
+        Key: { userId: { S: "TOTAL" }, statType: { S: "TOTAL" } },
+        UpdateExpression:
+          "SET totalUploads = if_not_exists(totalUploads, :zero) + :inc, inappropriateUploads = if_not_exists(inappropriateUploads, :zero) + :inappropriate",
+        ExpressionAttributeValues: {
+          ":inc": { N: "1" },
+          ":inappropriate": { N: isInappropriate ? "1" : "0" },
+          ":zero": { N: "0" },
+        },
+      })
+    );
+
+    if (isInappropriate) {
       return {
         statusCode: 200,
         body: JSON.stringify({

@@ -5,15 +5,17 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export class LambdaStack extends Stack {
   public readonly getPresignedUrlFunction: NodejsFunction;
   public readonly moderateImageFunction: NodejsFunction;
+  public readonly getStatsFunction: NodejsFunction;
 
   constructor(
     scope: Construct,
     id: string,
-    props?: StackProps & { bucket: s3.IBucket }
+    props?: StackProps & { bucket: s3.IBucket; userStatsTable: dynamodb.Table }
   ) {
     super(scope, id, props);
 
@@ -67,10 +69,25 @@ export class LambdaStack extends Stack {
       }
     );
 
+    this.getStatsFunction = new NodejsFunction(this, "GetStatsFunction", {
+      entry: "lambda/getStats.handler.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      environment: {
+        USER_STATS_TABLE: props?.userStatsTable.tableName || "",
+      },
+    });
+
     // Grant S3 permissions to the function
     if (props?.bucket) {
       props.bucket.grantReadWrite(this.getPresignedUrlFunction); // Grant both read and write permissions
       props.bucket.grantRead(this.moderateImageFunction);
+    }
+
+    //Grant DynamoDB permissions
+    if (props?.userStatsTable) {
+      props.userStatsTable.grantReadData(this.moderateImageFunction);
+      props.userStatsTable.grantWriteData(this.getStatsFunction);
     }
   }
 }
