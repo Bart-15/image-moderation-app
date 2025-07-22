@@ -35,6 +35,7 @@ export class LambdaStack extends Stack {
         },
         environment: {
           BUCKET_NAME: props?.bucket.bucketName || "",
+          USER_STATS_TABLE: props?.userStatsTable.tableName || "",
         },
         initialPolicy: [
           new iam.PolicyStatement({
@@ -86,8 +87,19 @@ export class LambdaStack extends Stack {
 
     //Grant DynamoDB permissions
     if (props?.userStatsTable) {
-      props.userStatsTable.grantReadData(this.moderateImageFunction);
-      props.userStatsTable.grantWriteData(this.getStatsFunction);
+      props.userStatsTable.grantReadWriteData(this.moderateImageFunction);
+      props.userStatsTable.grantReadWriteData(this.getStatsFunction);
+
+      // Add GSI permissions
+      this.getStatsFunction.addToRolePolicy(
+        new iam.PolicyStatement({
+          actions: ["dynamodb:Query", "dynamodb:Scan"],
+          resources: [
+            props.userStatsTable.tableArn,
+            `${props.userStatsTable.tableArn}/index/*`, // Grant access to all indexes
+          ],
+        })
+      );
     }
   }
 }
