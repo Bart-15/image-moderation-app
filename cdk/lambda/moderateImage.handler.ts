@@ -53,11 +53,13 @@ export const handler = async (
       new UpdateItemCommand({
         TableName: process.env.USER_STATS_TABLE,
         Key: { userId: { S: userId } },
-        UpdateExpression:
-          "SET totalUploads = if_not_exists(totalUploads, :zero) + :inc, inappropriateUploads = if_not_exists(inappropriateUploads, :zero) + :inappropriate",
+        UpdateExpression: `
+          SET totalUploads = if_not_exists(totalUploads, :zero) + :one,
+              inappropriateUploads = if_not_exists(inappropriateUploads, :zero) ${
+                isInappropriate ? "+ :one" : ""
+              }`,
         ExpressionAttributeValues: {
-          ":inc": { N: "1" },
-          ":inappropriate": { N: isInappropriate ? "1" : "0" },
+          ":one": { N: "1" },
           ":zero": { N: "0" },
         },
       })
@@ -67,13 +69,17 @@ export const handler = async (
     await docClient.send(
       new UpdateItemCommand({
         TableName: process.env.USER_STATS_TABLE,
-        Key: { userId: { S: "TOTAL" }, statType: { S: "TOTAL" } },
-        UpdateExpression:
-          "SET totalUploads = if_not_exists(totalUploads, :zero) + :inc, inappropriateUploads = if_not_exists(inappropriateUploads, :zero) + :inappropriate",
+        Key: { userId: { S: "TOTAL" } },
+        UpdateExpression: `
+          SET totalUploads = if_not_exists(totalUploads, :zero) + :one,
+              inappropriateUploads = if_not_exists(inappropriateUploads, :zero) ${
+                isInappropriate ? "+ :one" : ""
+              },
+              statType = :statType`,
         ExpressionAttributeValues: {
-          ":inc": { N: "1" },
-          ":inappropriate": { N: isInappropriate ? "1" : "0" },
+          ":one": { N: "1" },
           ":zero": { N: "0" },
+          ":statType": { S: "TOTAL" },
         },
       })
     );
