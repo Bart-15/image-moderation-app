@@ -5,6 +5,7 @@ import { LambdaStack } from "../lib/lambda-stack";
 import { ApiGatewayStack } from "./api-gw-stack";
 import { AuthStack } from "./auth-stack";
 import { DynamoDBStack } from "./dynamodb-stack";
+import { WebsiteHostingStack } from "./website-hosting-stack";
 
 export class MainStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -27,5 +28,7 @@ export class MainStack extends cdk.Stack {
       getStatsFunction: lambdaStack.getStatsFunction,
       userPool: authStack.userPool,
     });
+
+    new WebsiteHostingStack(this, "WebsiteHostingStack");
   }
 }
