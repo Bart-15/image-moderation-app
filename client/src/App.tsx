@@ -4,12 +4,6 @@ import { Dashboard } from "./features/dashboard";
 import UploadSection from "./components/upload-section";
 
 function App() {
-  // Static data for demonstration
-  const stats = {
-    totalUploads: 156,
-    inappropriateUploads: 12,
-  };
-
   return (
     <Authenticator>
       {({ user }) => (
