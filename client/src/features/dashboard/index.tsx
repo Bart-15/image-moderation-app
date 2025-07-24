@@ -1,13 +1,15 @@
-interface Stats {
-  totalUploads: number;
-  inappropriateUploads: number;
-}
+import CardLoader from "./components/card-loader";
+import { useGetStats } from "./hooks/useGetStats";
 
-interface DashboardProps {
-  stats: Stats;
-}
+export const Dashboard = () => {
+  const { data, isLoading } = useGetStats();
 
-export const Dashboard = ({ stats }: DashboardProps) => {
+  if (isLoading) {
+    return <CardLoader />;
+  }
+
+  const userStats = data?.data?.userStats;
+
   return (
     <div className="mb-8">
       <h2 className="text-xl font-medium text-gray-900 mb-6">Dashboard</h2>
@@ -33,7 +35,7 @@ export const Dashboard = ({ stats }: DashboardProps) => {
             </div>
           </div>
           <p className="mt-4 text-3xl font-bold text-gray-900">
-            {stats.totalUploads}
+            {userStats.totalUploads}
           </p>
           <p className="mt-1 text-sm text-gray-500">Total images processed</p>
         </div>
@@ -61,7 +63,7 @@ export const Dashboard = ({ stats }: DashboardProps) => {
             </div>
           </div>
           <p className="mt-4 text-3xl font-bold text-gray-900">
-            {stats.inappropriateUploads}
+            {userStats.inappropriateUploads}
           </p>
           <p className="mt-1 text-sm text-gray-500">Flagged inappropriate</p>
         </div>

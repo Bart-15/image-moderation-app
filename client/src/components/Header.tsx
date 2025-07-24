@@ -23,7 +23,6 @@ export const Header = ({ user }: HeaderProps) => {
     await signOut();
   }
 
-  console.log("user", user);
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">

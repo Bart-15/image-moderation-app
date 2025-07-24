@@ -1,9 +1,7 @@
-import "@aws-amplify/ui-react/styles.css";
-import "./lib/amplify";
 import { Authenticator } from "@aws-amplify/ui-react";
-import { Header } from "./components/Header";
-import { Dashboard } from "./components/Dashboard";
-import UploadSection from "./components/UploadSection";
+import { Header } from "./components/header";
+import { Dashboard } from "./features/dashboard";
+import UploadSection from "./components/upload-section";
 
 function App() {
   // Static data for demonstration
