@@ -69,10 +69,11 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
       if (moderationData.isAppropriate) {
         toast.success("File is appropriate");
-        setSelectedFile(null);
       } else {
         toast.error("File is inappropriate");
       }
+
+      setSelectedFile(null);
 
       queryClient.invalidateQueries({
         queryKey: [keys.stats],
