@@ -87,6 +87,10 @@ export const handler = async (
     if (isInappropriate) {
       return {
         statusCode: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*", // Configure this based on your frontend URL
+        },
         body: JSON.stringify({
           message: "Image contains inappropriate content",
           isAppropriate: false,
@@ -110,6 +114,10 @@ export const handler = async (
 
     return {
       statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*", // Configure this based on your frontend URL
+      },
       body: JSON.stringify({
         isAppropriate: true,
         labels: labelsResponse.Labels,
@@ -119,6 +127,10 @@ export const handler = async (
     console.error("Error analyzing image:", error);
     return {
       statusCode: 500,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*", // Configure this based on your frontend URL
+      },
       body: JSON.stringify({ error: "Failed to analyze image" }),
     };
   }

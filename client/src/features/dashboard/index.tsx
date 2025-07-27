@@ -35,7 +35,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <p className="mt-4 text-3xl font-bold text-gray-900">
-            {userStats.totalUploads}
+            {userStats?.totalUploads}
           </p>
           <p className="mt-1 text-sm text-gray-500">Total images processed</p>
         </div>
@@ -63,7 +63,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <p className="mt-4 text-3xl font-bold text-gray-900">
-            {userStats.inappropriateUploads}
+            {userStats?.inappropriateUploads}
           </p>
           <p className="mt-1 text-sm text-gray-500">Flagged inappropriate</p>
         </div>
