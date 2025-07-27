@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { axiosInstance } from "../utils/axios";
@@ -8,6 +8,8 @@ import { keys } from "../config/queryKeys";
 
 interface UseFileUploadReturn {
   selectedFile: File | null;
+  setSelectedFile: (file: File | null) => void;
+  previewUrl: string | null;
   dragActive: boolean;
   uploadMutation: UseMutationResult<void, Error, File>;
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -18,7 +20,23 @@ interface UseFileUploadReturn {
 
 export const useFileUpload = (): UseFileUploadReturn => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
+
+  useEffect(() => {
+    if (!selectedFile) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(objectUrl);
+
+    // Clean up the object URL when component unmounts or file changes
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [selectedFile]);
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -51,6 +69,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
       if (moderationData.isAppropriate) {
         toast.success("File is appropriate");
+        setSelectedFile(null);
       } else {
         toast.error("File is inappropriate");
       }
@@ -64,7 +83,6 @@ export const useFileUpload = (): UseFileUploadReturn => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
-      uploadMutation.mutate(e.target.files[0]);
     }
   };
 
@@ -74,7 +92,6 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setSelectedFile(e.dataTransfer.files[0]);
-      uploadMutation.mutate(e.dataTransfer.files[0]);
     }
   };
 
@@ -90,11 +107,13 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
   return {
     selectedFile,
+    previewUrl,
     dragActive,
     uploadMutation,
     handleFileSelect,
     handleDrop,
     handleDragOver,
     handleDragLeave,
+    setSelectedFile,
   };
 };
