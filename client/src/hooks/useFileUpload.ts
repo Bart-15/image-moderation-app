@@ -42,7 +42,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
     mutationFn: async (file: File) => {
       // First get the presigned URL
       const {
-        data: { url, fileName },
+        data: { url, key },
       } = await axiosInstance.get("/presigned-url", {
         params: { contentType: file.type },
       });
@@ -64,7 +64,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
       //Last step, run moderate API call to check if the image is safe
       const { data: moderationData } = await axiosInstance.post("/moderate", {
-        key: fileName,
+        key,
       });
 
       if (moderationData.isAppropriate) {
