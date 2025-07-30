@@ -6,17 +6,19 @@ import * as path from "path";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import "dotenv/config";
+
+interface LambdaStackProps extends StackProps {
+  bucket: s3.IBucket;
+  userStatsTable: dynamodb.Table;
+}
 
 export class LambdaStack extends Stack {
   public readonly getPresignedUrlFunction: NodejsFunction;
   public readonly moderateImageFunction: NodejsFunction;
   public readonly getStatsFunction: NodejsFunction;
 
-  constructor(
-    scope: Construct,
-    id: string,
-    props?: StackProps & { bucket: s3.IBucket; userStatsTable: dynamodb.Table }
-  ) {
+  constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
     // Create the moderate image function
@@ -34,8 +36,10 @@ export class LambdaStack extends Stack {
           externalModules: ["aws-sdk"],
         },
         environment: {
-          BUCKET_NAME: props?.bucket.bucketName || "",
-          USER_STATS_TABLE: props?.userStatsTable.tableName || "",
+          BUCKET_NAME: props.bucket.bucketName,
+          USER_STATS_TABLE: props.userStatsTable.tableName,
+          SES_SENDER_EMAIL: process.env.SES_SENDER_EMAIL ?? "",
+          NOTIFICATION_EMAIL: process.env.NOTIFICATION_EMAIL ?? "",
         },
         initialPolicy: [
           new iam.PolicyStatement({
@@ -44,6 +48,11 @@ export class LambdaStack extends Stack {
               "rekognition:DetectLabels",
               "rekognition:DetectModerationLabels",
             ],
+            resources: ["*"],
+          }),
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ["ses:SendEmail", "ses:SendRawEmail"],
             resources: ["*"],
           }),
         ],
@@ -65,7 +74,7 @@ export class LambdaStack extends Stack {
           externalModules: ["aws-sdk"],
         },
         environment: {
-          BUCKET_NAME: props?.bucket.bucketName || "",
+          BUCKET_NAME: props.bucket.bucketName,
         },
       }
     );
@@ -75,18 +84,18 @@ export class LambdaStack extends Stack {
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       environment: {
-        USER_STATS_TABLE: props?.userStatsTable.tableName || "",
+        USER_STATS_TABLE: props.userStatsTable.tableName,
       },
     });
 
     // Grant S3 permissions to the function
-    if (props?.bucket) {
+    if (props.bucket) {
       props.bucket.grantReadWrite(this.getPresignedUrlFunction); // Grant both read and write permissions
       props.bucket.grantRead(this.moderateImageFunction);
     }
 
     //Grant DynamoDB permissions
-    if (props?.userStatsTable) {
+    if (props.userStatsTable) {
       props.userStatsTable.grantReadWriteData(this.moderateImageFunction);
       props.userStatsTable.grantReadWriteData(this.getStatsFunction);
 

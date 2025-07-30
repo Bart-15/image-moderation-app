@@ -2,11 +2,13 @@ import "dotenv/config";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { RekognitionService } from "./services/rekognition.service";
 import { StatsService } from "./services/stats.service";
+import { SESService } from "./services/ses.service";
 import { ImageModerationRequest, ImageModerationResponse } from "./types/api";
 import { createResponse } from "./utils/response";
 
 const rekognitionService = new RekognitionService();
 const statsService = new StatsService(process.env.USER_STATS_TABLE || "");
+const sesService = new SESService();
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -39,6 +41,17 @@ export const handler = async (
     ]);
 
     if (isInappropriate) {
+      // Send email notification for inappropriate content
+      try {
+        await sesService.sendInappropriateContentEmail(
+          key,
+          moderationLabels ?? []
+        );
+      } catch (emailError) {
+        console.error("Failed to send email notification:", emailError);
+        // Continue execution even if email fails
+      }
+
       return createResponse(200, {
         message: "Image contains inappropriate content",
         isAppropriate: false,

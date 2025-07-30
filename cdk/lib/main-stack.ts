@@ -6,6 +6,7 @@ import { ApiGatewayStack } from "./api-gw-stack";
 import { AuthStack } from "./auth-stack";
 import { DynamoDBStack } from "./dynamodb-stack";
 import { WebsiteHostingStack } from "./website-hosting-stack";
+import { SESStack } from "./ses-stack";
 
 export class MainStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -16,6 +17,12 @@ export class MainStack extends cdk.Stack {
     const s3Stack = new S3Stack(this, "S3Stack");
 
     const dynamoStack = new DynamoDBStack(this, "DynamoDBStack");
+
+    new SESStack(this, "SESStack", {
+      env: {
+        region: process.env.AWS_REGION, // Match your SES region
+      },
+    });
 
     const lambdaStack = new LambdaStack(this, "LambdaStack", {
       bucket: s3Stack.bucket,
