@@ -7,6 +7,10 @@ type StatsType = "user" | "total";
 
 const statsService = new StatsService(process.env.USER_STATS_TABLE || "");
 
+function isValidStatsType(type: string | undefined): type is StatsType {
+  return type === "user" || type === "total";
+}
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -17,8 +21,14 @@ export const handler = async (
       return createResponse(401, { message: "Unauthorized" });
     }
 
-    // Get the type of stats requested from query parameters
-    const statsType = (event.queryStringParameters?.type || "") as StatsType;
+    // Get and validate the type of stats requested
+    const statsType = event.queryStringParameters?.type;
+    if (!isValidStatsType(statsType)) {
+      return createResponse(400, {
+        message: "Invalid stats type. Must be 'user' or 'total'",
+      });
+    }
+
     const response: {
       userStats?: { totalUploads: number; inappropriateUploads: number };
       totalStats?: { totalUploads: number; inappropriateUploads: number };
