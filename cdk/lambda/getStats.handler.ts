@@ -22,7 +22,7 @@ export const handler = async (
     }
 
     // Get and validate the type of stats requested
-    const statsType = event.queryStringParameters?.type;
+    const statsType = event.queryStringParameters?.type || "total";
     if (!isValidStatsType(statsType)) {
       return createResponse(400, {
         message: "Invalid stats type. Must be 'user' or 'total'",
@@ -35,12 +35,12 @@ export const handler = async (
     } = {};
 
     // Get user stats if requested
-    if (statsType === "user" || !statsType) {
+    if (statsType === "user") {
       response.userStats = await statsService.getUserStats(userId);
     }
 
     // Get total stats if requested
-    if (statsType === "total" || !statsType) {
+    if (statsType === "total") {
       response.totalStats = await statsService.getTotalStats();
     }
 
