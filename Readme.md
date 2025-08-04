@@ -131,6 +131,12 @@ npm run build
 npm run preview
 ```
 
+## 📧 Sample Email Notification
+
+When inappropriate content is detected, registered email receive an email notification as shown below:
+
+![Sample SES Email Notification](images/SampleEmail.png)
+
 ## 🙋‍♂️ Author
 
 Built by [Bart-15](https://github.com/Bart-15)  
