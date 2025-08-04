@@ -40,6 +40,10 @@ A serverless web application that allows authenticated users to upload images, a
 - [Vite](https://vitejs.dev)
 - [AWS Cognito](https://aws.amazon.com/cognito/) (for authentication)
 
+## 🏗️ Architecture
+
+![Image Moderation App Architecture](images/ImageModerationArchi.png)
+
 ---
 
 ## 🚀 Getting Started
