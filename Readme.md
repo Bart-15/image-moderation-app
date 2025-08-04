@@ -19,6 +19,7 @@ A serverless web application that allows authenticated users to upload images, a
 - ✅ Flag tracking per user using **DynamoDB**
 - ✅ Email alerts via **Amazon SES**
 - ✅ Designed with cost-efficiency using **pay-per-request** models
+- ✅ Automatic deletion of uploaded images after 24 hours via **S3 Lifecycle Rules**
 
 ## 📦 Tech Stack
 
