@@ -72,6 +72,7 @@ Create a `.env` file inside the `cdk/` folder:
 SES_SENDER_EMAIL=you_ses_sender_email
 NOTIFICATION_EMAIL=you_notification_email
 AWS_REGION=aws_region
+ALLOWED_ORIGINS=your_allowed_origins
 ```
 
 #### Deploy Infrastructure
