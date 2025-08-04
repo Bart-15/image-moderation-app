@@ -40,6 +40,8 @@ export class LambdaStack extends Stack {
           USER_STATS_TABLE: props.userStatsTable.tableName,
           SES_SENDER_EMAIL: process.env.SES_SENDER_EMAIL ?? "",
           NOTIFICATION_EMAIL: process.env.NOTIFICATION_EMAIL ?? "",
+          ALLOWED_ORIGINS:
+            process.env.ALLOWED_ORIGINS ?? "http://localhost:5173/",
         },
         initialPolicy: [
           new iam.PolicyStatement({
@@ -75,6 +77,8 @@ export class LambdaStack extends Stack {
         },
         environment: {
           BUCKET_NAME: props.bucket.bucketName,
+          ALLOWED_ORIGINS:
+            process.env.ALLOWED_ORIGINS ?? "http://localhost:5173/",
         },
       }
     );
@@ -85,6 +89,8 @@ export class LambdaStack extends Stack {
       runtime: Runtime.NODEJS_22_X,
       environment: {
         USER_STATS_TABLE: props.userStatsTable.tableName,
+        ALLOWED_ORIGINS:
+          process.env.ALLOWED_ORIGINS ?? "http://localhost:5173/",
       },
     });
 

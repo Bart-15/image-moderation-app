@@ -29,7 +29,7 @@ export class ApiGatewayStack extends cdk.Stack {
       description:
         "API for getting presigned URLs for image uploads and moderating images",
       defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowOrigins: apigateway.Cors.ALL_ORIGINS, // Allow all origins, we'll handle specific origin validation in Lambda
         allowMethods: ["OPTIONS", "POST", "GET"],
         allowHeaders: [
           "Content-Type",
