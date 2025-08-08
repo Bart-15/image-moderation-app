@@ -1,6 +1,6 @@
 # 🖼️ Image Moderation App (Serverless)
 
-A serverless web application that allows authenticated users to upload images, automatically detects inappropriate content using **Amazon Rekognition**, and stores analysis results in **DynamoDB**. Users are notified via **Amazon SES** if any content is flagged.
+A serverless web application that allows authenticated users to upload images, automatically detects inappropriate content using **Amazon Rekognition**, and tracks upload statistics in **DynamoDB** (total uploads and inappropriate uploads). Admin notified via **Amazon SES** if any content is flagged.
 
 ## 🛠️ Prerequisites
 
@@ -16,7 +16,7 @@ A serverless web application that allows authenticated users to upload images, a
 - ✅ User authentication via **Amazon Cognito**
 - ✅ Image uploads via **API Gateway + Lambda + S3**
 - ✅ Automatic image moderation using **Amazon Rekognition**
-- ✅ Flag tracking per user using **DynamoDB**
+- ✅ User statistics tracking in **DynamoDB** (total uploads and inappropriate uploads)
 - ✅ Email alerts via **Amazon SES**
 - ✅ Designed with cost-efficiency using **pay-per-request** models
 - ✅ Automatic deletion of uploaded images after 24 hours via **S3 Lifecycle Rules**
